@@ -32,32 +32,31 @@ int main()
         vector<int> arrived;
         for (int i = 0; i < n; ++i)
         {
-            if (!in_queue[i] && process[i].at <= current_time && i != last_idx && process[i].rem > 0)
+            if (process[i].at <= current_time && process[i].rem > 0)
             {
-                arrived.push_back(i);
-                in_queue[i] = true;
+                if(!in_queue[i] && i != last_idx )
+                    arrived.push_back(i);
             }
         }
         sort(arrived.begin(), arrived.end(), [&](int a, int b) { return process[a].at < process[b].at; });
-        for (int i : arrived)
-            q.push(i);
-        if (last_idx != -1 && process[last_idx].rem > 0)
-            q.push(last_idx);
 
-        if (q.empty())
+        for (int i : arrived)
         {
-            if (gantt_names.empty() || gantt_names.back() != "IDLE")
-            {
-                gantt_names.push_back("IDLE");
-                gantt_times.push_back(current_time - 1);
-            }
-            current_time++;
-            last_idx = -1;
+            q.push(i);
+            in_queue[i] = true;
+        } 
+
+        if (last_idx != -1 && process[last_idx].rem > 0)
+        {
+            q.push(last_idx);
+            in_queue[last_idx] = true;
         }
-        else
+
+        if (!q.empty())
         {
             int idx = q.front();
             q.pop();
+            in_queue[idx] = false;
 
             if (gantt_names.empty() || gantt_names.back() != process[idx].name)
             {
@@ -76,6 +75,16 @@ int main()
                 completed++;
                 last_idx = -1;
             }
+        }
+        else
+        {
+            if (gantt_names.empty() || gantt_names.back() != "IDLE")
+            {
+                gantt_names.push_back("IDLE");
+                gantt_times.push_back(current_time - 1);
+            }
+            current_time++;
+            last_idx = -1;
         }
     }
     gantt_times.push_back(current_time);
